@@ -65,9 +65,17 @@ pub fn tool_handler(attr: TokenStream, input: TokenStream) -> syn::Result<TokenS
         let tool_list_fn = syn::parse2::<ImplItem>(quote! {
             async fn list_tools(
                 &self,
-                _request: Option<rmcp::model::PaginatedRequestParams>,
+                request: Option<rmcp::model::PaginatedRequestParams>,
                 context: rmcp::service::RequestContext<rmcp::RoleServer>,
             ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
+                // This list is a single page and the server never issues a cursor,
+                // so any cursor a client sends is invalid (2025-11-25 pagination, -32602).
+                if request.as_ref().is_some_and(|params| params.cursor.is_some()) {
+                    return Err(rmcp::ErrorData::invalid_params(
+                        "invalid cursor: this server issues no pagination cursors",
+                        None,
+                    ));
+                }
                 let supports_cache_hints = context.protocol_version().is_some_and(|version| {
                     version >= rmcp::model::ProtocolVersion::V_2026_07_28
                 });
