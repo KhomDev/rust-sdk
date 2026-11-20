@@ -1,5 +1,5 @@
+#![cfg(not(feature = "local"))]
 #![cfg(all(feature = "client", feature = "server"))]
-
 use rmcp::{
     ClientHandler, RoleClient, RoleServer, ServerHandler, ServiceError,
     handler::server::router::{prompt::PromptRouter, tool::ToolRouter},
@@ -72,10 +72,7 @@ async fn disconnect(client: RunningService<RoleClient, PlainClient>, server_task
 }
 
 fn cursor(value: &str) -> Option<PaginatedRequestParams> {
-    Some(PaginatedRequestParams {
-        meta: None,
-        cursor: Some(value.to_owned()),
-    })
+    Some(PaginatedRequestParams::default().with_cursor(Some(value.to_owned())))
 }
 
 #[tokio::test]
