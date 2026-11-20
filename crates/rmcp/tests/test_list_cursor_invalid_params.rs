@@ -1,5 +1,4 @@
-#![cfg(not(feature = "local"))]
-#![cfg(feature = "client")]
+#![cfg(all(feature = "client", feature = "server"))]
 
 use rmcp::{
     ClientHandler, RoleClient, RoleServer, ServerHandler, ServiceError,
